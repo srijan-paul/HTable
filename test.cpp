@@ -1,3 +1,4 @@
+#include "benchmark/flat_hash_map.hpp"
 #include "clock.hpp"
 #include "src/htable.hpp"
 #include <array>
@@ -6,7 +7,8 @@
 #include <string>
 #include <unordered_map>
 
-static const std::size_t nruns = 100;
+
+static const std::size_t nruns = 100000;
 static std::vector<std::string> ks;
 static std::vector<std::string> vs;
 
@@ -68,10 +70,28 @@ void benchmark_table() {
 	}
 }
 
+void flat_test() {
+	Clock clock{"ska::flat_hash_map", nruns};
+
+	for (std::size_t i = 0; i < nruns; ++i) {
+		ska::flat_hash_map<std::string, std::string> table;
+		for (std::size_t i = 0; i < ks.size(); ++i) {
+			table[ks[i]] = vs[i];
+		}
+
+		for (std::size_t i = 0; i < ks.size(); ++i) {
+			if (table.find(ks[i])->second != vs[i]) {
+				exit(0);
+			}
+		}
+	}
+}
+
 void benchmark() {
 	prepare_bench_suite();
 	benchmark_unp();
 	benchmark_table();
+	flat_test();
 	std::cout << "\n\n";
 }
 
